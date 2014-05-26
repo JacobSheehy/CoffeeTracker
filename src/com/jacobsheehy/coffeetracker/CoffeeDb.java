@@ -14,6 +14,7 @@ public class CoffeeDb {
 	// Tables
 	public static final String COFFEE_SIZES = "coffee_sizes";
 	public static final String CONSUMPTION_LOG = "consumption_log";
+	public static final String PRODUCTIVITY_LOG = "productivity_log";
 	
 	// Coffee Size fields
 	public static final String KEY_ROW_ID = "_id";
@@ -24,6 +25,11 @@ public class CoffeeDb {
 	public static final String KEY_TIME = "time";
 	public static final String KEY_SIZE_NAME = "size";
 
+	// Productivity fields
+	public static final String KEY_PRODUCTIVITY_TIME = "productivity_notification_entered";
+	public static final String KEY_PRODUCTIVITY_RATING = "productivity_rating";
+	
+	
 	private Context mContext;
 
 	private DatabaseHelper mDbHelper;
@@ -37,9 +43,14 @@ public class CoffeeDb {
 			+ CONSUMPTION_LOG
 			+ " (_id integer primary key autoincrement, " + KEY_TIME
 			+ " real not null, " + KEY_SIZE_NAME + " text not null)";
+	
+	private static final String PRODUCTIVITY_LOG_TABLE_CREATE = "create table "
+			+ PRODUCTIVITY_LOG
+			+ " (_id integer primary key autoincrement, " + KEY_PRODUCTIVITY_TIME
+			+ " real not null, " + KEY_PRODUCTIVITY_RATING + " text not null)";
 
 	private static final String DATABASE_NAME = "CoffeeDb";
-	private static final int DATABASE_VERSION = 3; 
+	private static final int DATABASE_VERSION = 4; 
 
 	public CoffeeDb open() throws SQLException {
 		mDbHelper = new DatabaseHelper(mContext);
@@ -51,7 +62,18 @@ public class CoffeeDb {
 		mDbHelper.close();
 	}
 	
-	
+	/**
+	 * Add new productivity
+
+	 * @return
+	 */
+	public long addProductivity(int rating) {
+		ContentValues initialValues = new ContentValues();
+		initialValues.put(KEY_PRODUCTIVITY_TIME, System.currentTimeMillis());
+		initialValues.put(KEY_PRODUCTIVITY_RATING, rating);
+		return mDB.insert(PRODUCTIVITY_LOG, null, initialValues);
+	}
+
 	/**
 	 * Add new coffee
 
@@ -63,7 +85,6 @@ public class CoffeeDb {
 		initialValues.put(KEY_SIZE_NAME, sizeName);
 		return mDB.insert(CONSUMPTION_LOG, null, initialValues);
 	}
-
 	
 	/**
 	 * Fetch recent condition delivery
@@ -91,16 +112,18 @@ public class CoffeeDb {
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL(COFFEE_SIZES_TABLE_CREATE);
 			db.execSQL(CONSUMPTION_LOG_TABLE_CREATE);
+			db.execSQL(PRODUCTIVITY_LOG_TABLE_CREATE);
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			// Build upgrade mechanism
-			db.execSQL("DROP TABLE " + COFFEE_SIZES);
-			db.execSQL("DROP TABLE " + CONSUMPTION_LOG);
+			//db.execSQL("DROP TABLE " + COFFEE_SIZES);
+			//db.execSQL("DROP TABLE " + CONSUMPTION_LOG);
 		
-			db.execSQL(COFFEE_SIZES_TABLE_CREATE);
-			db.execSQL(CONSUMPTION_LOG_TABLE_CREATE);
+			// db.execSQL(COFFEE_SIZES_TABLE_CREATE);
+			// db.execSQL(CONSUMPTION_LOG_TABLE_CREATE);
+			// db.execSQL(PRODUCTIVITY_LOG_TABLE_CREATE);
 		}
 	}
 	
