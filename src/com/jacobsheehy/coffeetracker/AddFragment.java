@@ -7,6 +7,7 @@ import java.util.Date;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,6 +23,21 @@ public class AddFragment extends Fragment implements OnClickListener {
 	Button buttonSmall;
 	
 	CoffeeDb db;
+	ViewPager pager;
+	
+	private static final String LARGE = "large";
+	private static final String MEDIUM = "medium";
+	private static final String SMALL = "small";
+	
+	public void moveNext() {
+	    //it doesn't matter if you're already in the last item
+	    pager.setCurrentItem(pager.getCurrentItem() + 1);
+	}
+
+	public void movePrevious() {
+	    //it doesn't matter if you're already in the first item
+	    pager.setCurrentItem(pager.getCurrentItem() - 1);
+	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -34,6 +50,7 @@ public class AddFragment extends Fragment implements OnClickListener {
 		buttonMedium.setOnClickListener(this);
 		buttonSmall = (Button) v.findViewById(R.id.buttonSmall);
 		buttonSmall.setOnClickListener(this);
+		
 		return v;
 	}
 	
@@ -56,8 +73,15 @@ public class AddFragment extends Fragment implements OnClickListener {
 					+ ": " + coffee.getSizeName() + "\n";
 		}
 		db.close();
-		TextView summary = (TextView) getActivity().findViewById(R.id.home_summary);
-		summary.setText(displayList);
+				
+		pager = (ViewPager) getActivity().findViewById(R.id.pager);
+		movePrevious();
+	}
+	
+	private void sendNotification(String size) {
+		log("add fragment sending notification for " + size);
+		ProductivityNotificationSender sender = new ProductivityNotificationSender(getActivity().getApplicationContext());
+		sender.send(0, size);
 	}
 	
 	@Override
@@ -65,27 +89,34 @@ public class AddFragment extends Fragment implements OnClickListener {
 		switch(v.getId()) {
 		case R.id.buttonLarge:
 			db.open();
-			db.addCoffee("large");
+			db.addCoffee(LARGE);
 			db.close();
 			Toast.makeText(getActivity(), "Added Large", Toast.LENGTH_SHORT).show();
 			updateView();
+			sendNotification(LARGE);
 			break;
 		case R.id.buttonMedium:
 			db.open();
-			db.addCoffee("medium");
+			db.addCoffee(MEDIUM);
 			db.close();
 			Toast.makeText(getActivity(), "Added Medium", Toast.LENGTH_SHORT).show();
 			updateView();
+			sendNotification(MEDIUM);
 			break;
 		case R.id.buttonSmall:
 			db.open();
-			db.addCoffee("small");
+			db.addCoffee(SMALL);
 			db.close();
 			Toast.makeText(getActivity(), "Added Small", Toast.LENGTH_SHORT).show();
 			updateView();
+			sendNotification(SMALL);
 			break;
 		default:
 			// 
 		}
+	}
+	
+	private void log(String message) {
+		System.out.println(message);
 	}
 }
