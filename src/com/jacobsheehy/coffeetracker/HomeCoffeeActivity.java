@@ -2,6 +2,10 @@ package com.jacobsheehy.coffeetracker;
 
 import java.util.Locale;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -14,6 +18,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class HomeCoffeeActivity extends FragmentActivity {
@@ -32,10 +37,6 @@ public class HomeCoffeeActivity extends FragmentActivity {
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
-
-
-	Button buttonLarge;
-	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,13 +59,19 @@ public class HomeCoffeeActivity extends FragmentActivity {
 		getMenuInflater().inflate(R.menu.home_coffee, menu);
 		return true;
 	}
-
+	
+	
+	
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.
 	 */
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+		public int getItemPosition(Object object){
+		     return POSITION_NONE;
+		}
+		
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
 		}

@@ -1,9 +1,5 @@
 package com.jacobsheehy.coffeetracker;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,17 +9,21 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
-public class AddFragment extends Fragment implements OnClickListener {
+import com.jacobsheehy.coffeetracker.HomeFragment.CoffeeAdapter;
 
+public class AddFragment extends Fragment implements OnClickListener {
+	
 	Button buttonLarge;
 	Button buttonMedium;
 	Button buttonSmall;
 	
 	CoffeeDb db;
 	ViewPager pager;
+	ListView list;
+	
 	
 	private static final String LARGE = "large";
 	private static final String MEDIUM = "medium";
@@ -50,32 +50,26 @@ public class AddFragment extends Fragment implements OnClickListener {
 		buttonMedium.setOnClickListener(this);
 		buttonSmall = (Button) v.findViewById(R.id.buttonSmall);
 		buttonSmall.setOnClickListener(this);
-		
+		list = (ListView) v.findViewById(R.id.listview);
 		return v;
 	}
 	
 	
 	private void updateView() {
-		db = new CoffeeDb(getActivity());
-		db.open();
-		Cursor c = db.fetchTodaysCoffees();
-
-		ArrayList<Coffee> coffeeList = new ArrayList<Coffee>();
-		String displayList = "";
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-
-		while (c.moveToNext()) {
-			Coffee coffee = new Coffee();
-			coffee.setConsumptionTime(c.getLong(1));
-			coffee.setSizeName(c.getString(2));
-			coffeeList.add(coffee);
-			displayList += sdf.format(new Date(coffee.getConsumptionTime()))
-					+ ": " + coffee.getSizeName() + "\n";
-		}
-		db.close();
-				
+		System.out.println("addfragment updateview");
 		pager = (ViewPager) getActivity().findViewById(R.id.pager);
 		movePrevious();
+		
+		list = (ListView) getActivity().findViewById(R.id.listview);
+		
+		if(list!=null) {
+			list.invalidateViews();
+			CoffeeAdapter adapter = (CoffeeAdapter) list.getAdapter();
+			Cursor c = adapter.getCursor();
+			c.requery();
+		} else {
+			System.out.println("list is null");
+		}
 	}
 	
 	private void sendNotification(String size) {

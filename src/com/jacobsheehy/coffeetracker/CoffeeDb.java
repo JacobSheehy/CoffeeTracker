@@ -86,6 +86,16 @@ public class CoffeeDb {
 		return mDB.insert(CONSUMPTION_LOG, null, initialValues);
 	}
 	
+
+	/**
+	 * Delete a coffee coffee
+
+	 * @return
+	 */
+	public long deleteCoffee(int index) {
+		return mDB.delete(CONSUMPTION_LOG, "_id=?", new String[] { index + "" });
+	}
+	
 	/**
 	 * Fetch recent condition delivery
 	 * 

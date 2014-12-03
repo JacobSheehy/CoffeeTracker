@@ -1,35 +1,37 @@
 package com.jacobsheehy.coffeetracker;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-public class HomeFragment extends ListFragment {
-
+public class HomeFragment extends Fragment  {
+	
 	public class CoffeeAdapter extends SimpleCursorAdapter {
 
 		private int mSelectedPosition;
 		Cursor items;
 		private Context ctx;
 		private int layout;
-
+		
+		@Override
+		public void changeCursor(Cursor cursor) {
+		    super.changeCursor(cursor);
+		}
+		
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
-		    Cursor c = getCursor();
-
-
+		    final Cursor c = getCursor();
 		    
 		    final LayoutInflater inflater = LayoutInflater.from(context);
 		    View v = inflater.inflate(layout, parent, false);
@@ -38,11 +40,25 @@ public class HomeFragment extends ListFragment {
 		    
 			    int nameCol = c.getColumnIndex(CoffeeDb.KEY_SIZE_NAME);
 			    String name = c.getString(nameCol);
-	
+			  
+			    
 			    TextView name_text = (TextView) v.findViewById(R.id.textCoffeeSize);
+			    
 			    if (name_text != null) {
 			        name_text.setText(name);
 			    }
+			    
+			    Button delete = (Button) v.findViewById(R.id.buttonDeleteCoffee);
+			    delete.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						 int index = c.getInt(c.getColumnIndex("_id"));
+						 System.out.println("deleting " + index);
+						 db.deleteCoffee(index);
+						 updateView();
+					}
+				});
 		    }
 		    return v;
 		}
@@ -83,18 +99,22 @@ public class HomeFragment extends ListFragment {
 	ListAdapter adapter = null;
 	Cursor cursor = null;
 	
+	private ListView list;
+	
 	@Override
 	public void onResume() {
 		super.onResume();
 		if(cursor!=null ) {
 			cursor.requery();
 		}
+		
 		updateView();
 	}
 
+	
 	private void updateView() {
 		Cursor c = db.fetchTodaysCoffees();
-		
+		System.out.println("updating view");
 
 		getActivity().startManagingCursor(c);
 
@@ -103,13 +123,15 @@ public class HomeFragment extends ListFragment {
 				new String[] { CoffeeDb.KEY_SIZE_NAME, CoffeeDb.KEY_TIME },
 				new int[] { R.id.textCoffeeSize, R.id.textCoffeeTime });
 		
+		list = (ListView) getActivity().findViewById(R.id.listview);
 		
-		setListAdapter(adapter);
-
-		//db.close();
-
+		if(list!=null) {
+			list.setAdapter(adapter);
+			list.invalidateViews();
+		}
 	}
 	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -119,7 +141,8 @@ public class HomeFragment extends ListFragment {
 		db = new CoffeeDb(context);
 		db.open();
 		
-		// updateView();
+		
+		updateView();
 		return v;
 	}
 
